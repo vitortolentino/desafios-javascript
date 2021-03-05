@@ -52,6 +52,48 @@
  *  }
  */
 
-const normalizeData = unormalized => {}
+const normalizeData = (unormalized) => {
+  const reports = normalizeReports(unormalized.reports, unormalized.user.id)
+
+  const normalized = {
+    reports,
+    users: normalizeUsers(unormalized.user),
+    results: normalizeResults(unormalized.id, unormalized.user.id, reports),
+  }
+
+  return normalized
+}
+
+const normalizeUsers = ({ id, name }) => ({
+  [id]: {
+    id,
+    name,
+  },
+})
+
+const normalizeReports = (reports, userId) => {
+  return reports.reduce((normalizedReports, { id, result }) => {
+    normalizedReports[id] = {
+      id,
+      user: userId,
+      status: result.status,
+      document: result.document,
+    }
+
+    return normalizedReports
+  }, {})
+}
+
+const normalizeResults = (id, userId, reports) => {
+  const reportsIdList = Object.keys(reports)
+
+  return {
+    [id]: {
+      id,
+      user: userId,
+      reports: reportsIdList,
+    },
+  }
+}
 
 module.exports = normalizeData
