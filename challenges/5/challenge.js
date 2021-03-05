@@ -26,7 +26,42 @@
  */
 
 const posts = require('./posts.json')
+const cache = {}
 
-const paginate = (pageNumber, itemsPerPage) => {}
+const paginate = (collection = posts, pageNumber = 1, itemsPerPage = 10) => {
+  if (typeof collection === 'string') {
+    throw new Error('Expect array and got string')
+  }
+
+  const total = collection.length
+  const totalPages = Math.ceil(total / itemsPerPage)
+  const indexToStartSlice = (pageNumber - 1) * itemsPerPage
+
+  const cacheKey = `posts-${pageNumber}-${itemsPerPage}`
+
+  const cachedList = getCachedData(cacheKey)
+
+  const data = cachedList || collection.slice(indexToStartSlice, itemsPerPage)
+
+  if (!cachedList) {
+    setCacheData(cacheKey, data)
+  }
+
+  return {
+    data,
+    total,
+    totalPages,
+    perPage: itemsPerPage,
+    currentPage: pageNumber,
+  }
+}
+
+const getCachedData = (key) => {
+  const cachedList = cache[key]
+
+  return cachedList
+}
+
+const setCacheData = (key, value) => (cache[key] = value)
 
 module.exports = paginate
