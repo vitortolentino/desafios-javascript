@@ -26,8 +26,43 @@
  * }
  */
 
-const extractSize = htmlTemplate => {}
+const extractSize = (htmlTemplate) => {
+  const htmlTemplateType = typeof htmlTemplate
+  if (!htmlTemplate || htmlTemplateType !== 'string') {
+    return {
+      width: 0,
+      height: 0,
+    }
+  }
 
-module.exports = extractSize;
+  const regexMatchSizes = /^.+?(?=.*(width).+?(\d+))(?=.*?(height).+?(\d+)).+$/s
+  const matched = htmlTemplate.match(regexMatchSizes)
 
+  if (!matched) {
+    return {
+      width: 0,
+      height: 0,
+    }
+  }
 
+  const onlySizesMatched = matched.slice(1, matched.length)
+
+  const formattedSize = formatSize(onlySizesMatched)
+
+  return formattedSize
+}
+
+const formatSize = (sizesList) => {
+  const sizes = {}
+  for (let index = 0; index < sizesList.length; index += 2) {
+    const propNameIndex = index
+    const propName = sizesList[propNameIndex]
+    const propValue = Number(sizesList[propNameIndex + 1])
+
+    sizes[propName] = propValue
+  }
+
+  return sizes
+}
+
+module.exports = extractSize
